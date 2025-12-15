@@ -1,8 +1,8 @@
 ---
-stepsCompleted: []
+stepsCompleted: [1]
 inputDocuments: ['prd.md', 'brainstorm-rhythm-chess.md', 'GDD.md']
 workflowType: 'architecture'
-lastStep: 0
+lastStep: 1
 project_name: 'bmab_base'
 user_name: 'sanan'
 date: '2025-12-15'
