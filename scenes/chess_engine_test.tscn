@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cncvgsy73drdg"]
+
+[ext_resource type="Script" uid="uid://bhl3ajtsh534k" path="res://testing/chess_engine/board_initialization_test.gd" id="1_5xqkp"]
+
+[node name="ChessEngineTest" type="Node"]
+script = ExtResource("1_5xqkp")

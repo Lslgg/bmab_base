@@ -44,8 +44,8 @@ development_status:
   # Epic 1: 核心游戏引擎
   epic-1: in-progress
   1-1-godot-project-setup: done
-  1-2-chess-rules-movement: ready-for-dev
-  1-3-3d-board-rendering: backlog
+  1-2-chess-rules-movement: done
+  1-3-3d-board-rendering: drafted
   1-4-basic-ui-framework: backlog
   epic-1-retrospective: optional
 

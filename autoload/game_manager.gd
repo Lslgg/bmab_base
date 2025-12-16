@@ -15,7 +15,7 @@ enum GameState {
 	SETTINGS
 }
 
-var current_state: GameState = GameState.MENU
+var current_state: GameManagerSingleton.GameState = GameState.MENU
 var game_session_data: Dictionary = {}
 var performance_metrics: Dictionary = {}
 
@@ -46,7 +46,7 @@ func _process(_delta):
 	current_fps = Engine.get_frames_per_second()
 
 ## Change game state with validation and event emission
-func change_state(new_state: GameState):
+func change_state(new_state: GameManagerSingleton.GameState):
 	if new_state == current_state:
 		return  # No change needed
 	
@@ -73,7 +73,7 @@ func change_state(new_state: GameState):
 	print("Game state changed: " + GameState.keys()[old_state] + " -> " + GameState.keys()[new_state])
 
 ## Validate if state transition is allowed
-func _is_valid_state_transition(from_state: GameState, to_state: GameState) -> bool:
+func _is_valid_state_transition(from_state: GameManagerSingleton.GameState, to_state: GameManagerSingleton.GameState) -> bool:
 	# Define valid transitions
 	var valid_transitions = {
 		GameState.MENU: [GameState.CALIBRATION, GameState.GAME_SETUP, GameState.SETTINGS],
@@ -88,7 +88,7 @@ func _is_valid_state_transition(from_state: GameState, to_state: GameState) -> b
 	return to_state in valid_transitions.get(from_state, [])
 
 ## Handle state exit cleanup
-func _exit_state(state: GameState):
+func _exit_state(state: GameManagerSingleton.GameState):
 	match state:
 		GameState.PLAYING:
 			# Pause any active game systems
@@ -98,7 +98,7 @@ func _exit_state(state: GameState):
 			pass
 
 ## Handle state entry setup
-func _enter_state(state: GameState):
+func _enter_state(state: GameManagerSingleton.GameState):
 	match state:
 		GameState.MENU:
 			# Reset game session data
