@@ -35,3 +35,4 @@ temp/
 !.mcp.json
 !.bmad/
 !docs/
+.godot/

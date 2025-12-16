@@ -1,0 +1,101 @@
+[gd_scene load_steps=2 format=3 uid="uid://bvxvuqvn2qxqx"]
+
+[ext_resource type="Script" uid="uid://bcrgv26rmrei0" path="res://scenes/main/main.gd" id="1_0hdqx"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_0hdqx")
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+
+[node name="MainMenu" type="Control" parent="UILayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="UILayer/MainMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.1, 0.1, 0.2, 1)
+
+[node name="Title" type="Label" parent="UILayer/MainMenu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -200.0
+offset_right = 400.0
+offset_bottom = -150.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Rhythm Chess (节奏象棋)"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Subtitle" type="Label" parent="UILayer/MainMenu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -100.0
+offset_right = 400.0
+offset_bottom = -75.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Revolutionary 3D Rhythm-Based Chess Game"
+horizontal_alignment = 1
+
+[node name="Status" type="Label" parent="UILayer/MainMenu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = 50.0
+offset_right = 400.0
+offset_bottom = 75.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Foundation Setup Complete - Press F1-F4 for debug functions"
+horizontal_alignment = 1
+
+[node name="SystemInfo" type="Label" parent="UILayer/MainMenu"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -50.0
+offset_right = 200.0
+offset_bottom = -25.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "Godot 4.x | Foundation Ready"
+horizontal_alignment = 1
+
+[node name="GameViewport3D" type="SubViewport" parent="."]
+size = Vector2i(1280, 720)
+
+[node name="GameScene3D" type="Node3D" parent="GameViewport3D"]
+
+[node name="MainCamera" type="Camera3D" parent="GameViewport3D/GameScene3D"]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 5, 10)
+
+[node name="MainLight" type="DirectionalLight3D" parent="GameViewport3D/GameScene3D"]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 5, 10, 5)
