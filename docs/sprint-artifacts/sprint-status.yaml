@@ -1,0 +1,114 @@
+# generated: 2025-12-16
+# project: bmab_base
+# project_key: bmab_base
+# tracking_system: file-system
+# story_location: docs/sprint-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - drafted: Story file created in stories folder
+#   - ready-for-dev: Draft approved and story context created
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - completed: Retrospective has been done
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically drafts next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2025-12-16
+project: bmab_base
+project_key: bmab_base
+tracking_system: file-system
+story_location: docs/sprint-artifacts
+
+development_status:
+  # Epic 1: 核心游戏引擎
+  epic-1: in-progress
+  1-1-godot-project-setup: ready-for-dev
+  1-2-chess-rules-movement: backlog
+  1-3-3d-board-rendering: backlog
+  1-4-basic-ui-framework: backlog
+  epic-1-retrospective: optional
+
+  # Epic 2: 音频节拍系统
+  epic-2: backlog
+  2-1-audio-analysis-bpm: backlog
+  2-2-beat-sync-mechanism: backlog
+  2-3-audio-delay-compensation: backlog
+  2-4-audio-feedback-system: backlog
+  epic-2-retrospective: optional
+
+  # Epic 3: 3D多层棋盘
+  epic-3: backlog
+  3-1-three-layer-board: backlog
+  3-2-vertical-movement: backlog
+  3-3-inter-layer-attacks: backlog
+  3-4-3d-camera-control: backlog
+  epic-3-retrospective: optional
+
+  # Epic 4: 色彩匹配系统
+  epic-4: backlog
+  4-1-audio-spectrum-analysis: backlog
+  4-2-realtime-color-generation: backlog
+  4-3-matching-judgment-system: backlog
+  4-4-visual-feedback-effects: backlog
+  epic-4-retrospective: optional
+
+  # Epic 5: 技能和能量系统
+  epic-5: backlog
+  5-1-rhythm-energy-accumulation: backlog
+  5-2-piece-special-skills: backlog
+  5-3-combo-skill-system: backlog
+  5-4-skill-balance-consumption: backlog
+  epic-5-retrospective: optional
+
+  # Epic 6: AI对手系统
+  epic-6: backlog
+  6-1-basic-ai-decision-engine: backlog
+  6-2-ai-beat-sync: backlog
+  6-3-multi-difficulty-ai: backlog
+  6-4-ai-performance-optimization: backlog
+  epic-6-retrospective: optional
+
+  # Epic 7: 用户界面和体验
+  epic-7: backlog
+  7-1-game-ui-design: backlog
+  7-2-tutorial-guide-system: backlog
+  7-3-settings-options-interface: backlog
+  7-4-user-experience-optimization: backlog
+  epic-7-retrospective: optional
+
+  # Epic 8: 音乐和音效集成
+  epic-8: backlog
+  8-1-background-music-library: backlog
+  8-2-dynamic-music-system: backlog
+  8-3-complete-sound-effects: backlog
+  8-4-audio-performance-optimization: backlog
+  epic-8-retrospective: optional
+
+  # Epic 9: 测试和优化
+  epic-9: backlog
+  9-1-performance-optimization-bugfix: backlog
+  9-2-balance-adjustment-testing: backlog
+  9-3-user-testing-feedback: backlog
+  9-4-release-preparation-packaging: backlog
+  epic-9-retrospective: optional

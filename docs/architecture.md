@@ -1,8 +1,8 @@
 ---
-stepsCompleted: [1, 2, 3, 4]
+stepsCompleted: [1, 2, 3, 4, 5, 6]
 inputDocuments: ['prd.md', 'brainstorm-rhythm-chess.md', 'GDD.md']
 workflowType: 'architecture'
-lastStep: 4
+lastStep: 6
 project_name: 'bmab_base'
 user_name: 'sanan'
 date: '2025-12-15'
@@ -728,3 +728,393 @@ rhythm_chess/
 - 数据持久化 ↔ 用户校准系统（存储个人化校准数据）
 - Forward+渲染 ↔ 音频可视化（支持丰富的视觉效果）
 - 输入系统 ↔ 用户界面（统一的交互体验）
+
+## 实施模式与一致性规则
+
+### 模式类别定义
+
+**关键冲突点识别：** 5个主要领域，15+个具体冲突点，确保AI代理协作一致性
+
+### 命名模式
+
+**GDScript命名约定：**
+- **类名**: PascalCase (`ChessBoard`, `BeatDetector`, `AudioManager`)
+- **文件名**: snake_case (`chess_board.gd`, `beat_detector.gd`, `audio_manager.gd`)
+- **变量/函数**: snake_case (`get_board_state()`, `detect_beat()`, `user_settings`)
+- **信号**: snake_case (`beat_detected`, `game_state_changed`, `error_occurred`)
+- **常量**: SCREAMING_SNAKE_CASE (`MAX_SEARCH_DEPTH`, `TARGET_LATENCY`, `DEFAULT_BPM`)
+- **节点名**: PascalCase (`AudioManager`, `ChessBoard`, `GameUI`)
+
+### 结构模式
+
+**项目组织：功能优先架构**
+```
+scripts/
+├── timing_core/           # 时间核心层
+│   ├── latency_normalizer.gd
+│   ├── beat_prophet.gd
+│   └── human_calibrator.gd
+├── prediction_engine/     # 预测引擎
+│   ├── timeline_generator.gd
+│   └── event_scheduler.gd
+├── human_integration/     # 人机集成
+│   ├── personal_calibration.gd
+│   └── adaptive_feedback.gd
+├── game_core/            # 游戏逻辑层
+│   ├── chess_engine/
+│   └── rhythm_system/
+├── rendering/            # 3D渲染层
+└── user_experience/      # 用户体验层
+```
+
+**测试组织：** 测试文件与源码就近放置，使用`_test.gd`后缀
+
+### 通信模式
+
+**事件总线通信：**
+- **统一通信**: 所有组件间通信通过全局EventBus
+- **事件命名**: snake_case格式 (`beat_detected`, `ai_move_calculated`)
+- **事件数据**: 使用自定义类格式传递结构化数据
+- **时间同步**: 所有音频相关事件包含精确时间戳
+
+```gdscript
+# 标准事件发送
+EventBus.emit_signal("beat_detected", beat_event)
+
+# 标准事件接收
+func _ready():
+    EventBus.beat_detected.connect(_on_beat_detected)
+```
+
+### 数据格式模式
+
+**自定义类数据结构：**
+```gdscript
+# 音频事件数据
+class_name BeatEvent
+extends RefCounted
+
+var timestamp: float
+var confidence: float
+var bpm: int
+var beat_index: int
+
+# 游戏状态数据
+class_name BoardState
+extends RefCounted
+
+var pieces: Array[ChessPiece]
+var current_player: int
+var move_history: Array[Move]
+```
+
+### 错误处理模式
+
+**信号通知错误处理：**
+- **统一错误信号**: 通过EventBus发送`error_occurred`信号
+- **错误分类**: 按严重程度分类（警告、错误、致命）
+- **优雅降级**: 音频失败自动切换到视觉节拍器
+- **用户通知**: 统一的错误提示界面
+
+```gdscript
+# 标准错误处理
+class_name ErrorEvent
+extends RefCounted
+
+var type: String          # "warning", "error", "fatal"
+var component: String     # 发生错误的组件
+var message: String       # 用户友好的错误信息
+var technical_details: String  # 技术详情
+```
+
+### 强制执行规则
+
+**所有AI代理必须：**
+- 严格遵循Godot官方命名约定
+- 使用功能优先的项目组织结构
+- 通过EventBus进行所有组件间通信
+- 使用自定义类定义所有数据结构
+- 通过信号通知处理所有错误情况
+- 为所有公共方法和类编写文档注释
+- 在修改核心架构前通过EventBus发送架构变更事件
+
+**模式强制执行：**
+- 代码审查检查清单验证模式遵循情况
+- 自动化测试验证事件总线通信正确性
+- 文档生成工具检查命名约定一致性
+
+### 模式示例
+
+**良好示例：**
+```gdscript
+# 正确的类定义和通信模式
+class_name BeatDetector
+extends Node
+
+signal beat_detected(beat_event: BeatEvent)
+
+func _ready():
+    EventBus.audio_input_received.connect(_on_audio_input)
+
+func _on_audio_input(audio_data: AudioData):
+    var beat_event = BeatEvent.new()
+    beat_event.timestamp = Time.get_time_dict_from_system()
+    beat_event.confidence = calculate_confidence(audio_data)
+
+    EventBus.emit_signal("beat_detected", beat_event)
+```
+
+**反模式（避免）：**
+```gdscript
+# 错误：直接引用其他节点
+get_node("/root/GameManager").onBeatDetected(time, conf)
+
+# 错误：使用Dictionary而非自定义类
+var beatData = {"time": 1.23, "conf": 0.9}
+
+# 错误：不一致的命名
+class_name beatDetector  # 应该是BeatDetector
+var beatTime             # 应该是beat_time
+```
+
+## 项目结构与边界定义
+
+### 完整项目目录结构
+
+```
+rhythm_chess/
+├── project.godot                    # Godot项目配置
+├── export_presets.cfg              # 导出预设配置
+├── README.md                       # 项目文档
+├── .gitignore                      # Git忽略文件
+├── .github/                        # GitHub工作流
+│   └── workflows/
+│       ├── ci.yml                  # 持续集成
+│       └── build.yml               # 构建流程
+├── docs/                           # 项目文档
+│   ├── architecture.md             # 架构文档
+│   ├── api_reference.md            # API参考
+│   └── development_guide.md        # 开发指南
+├── scenes/                         # Godot场景文件
+│   ├── main/
+│   │   ├── main.tscn              # 主场景
+│   │   └── main_test.tscn         # 主场景测试
+│   ├── game/
+│   │   ├── game_scene.tscn        # 游戏主场景
+│   │   ├── board/
+│   │   │   ├── chess_board_3d.tscn # 3D棋盘场景
+│   │   │   ├── chess_piece.tscn    # 棋子场景
+│   │   │   └── layer_manager.tscn  # 层级管理场景
+│   │   ├── ui/
+│   │   │   ├── game_ui.tscn       # 游戏界面
+│   │   │   ├── hud.tscn           # 抬头显示
+│   │   │   └── pause_menu.tscn    # 暂停菜单
+│   │   └── effects/
+│   │       ├── audio_visualizer.tscn # 音频可视化
+│   │       └── beat_effects.tscn   # 节拍特效
+│   ├── menus/
+│   │   ├── main_menu.tscn         # 主菜单
+│   │   ├── settings_menu.tscn     # 设置菜单
+│   │   ├── calibration_menu.tscn  # 校准菜单
+│   │   └── credits.tscn           # 制作人员
+│   └── test_scenes/               # 测试场景
+│       ├── audio_test.tscn        # 音频测试
+│       ├── performance_test.tscn   # 性能测试
+│       └── integration_test.tscn   # 集成测试
+├── scripts/                       # GDScript脚本
+│   ├── timing_core/               # 时间核心层
+│   │   ├── latency_normalizer.gd  # 延迟标准化器
+│   │   ├── beat_prophet.gd        # 节拍预测器
+│   │   ├── human_calibrator.gd    # 人机协作校准器
+│   │   ├── consistency_monitor.gd # 一致性监控器
+│   │   ├── timing_interfaces/
+│   │   │   ├── i_timing_source.gd # 时间源接口
+│   │   │   └── i_beat_predictor.gd # 节拍预测接口
+│   │   └── timing_core_test.gd    # 时间核心测试
+│   ├── prediction_engine/         # 预测引擎
+│   │   ├── timeline_generator.gd  # 时间线生成器
+│   │   ├── event_scheduler.gd     # 事件调度器
+│   │   ├── confidence_tracker.gd  # 置信度追踪器
+│   │   ├── fallback_predictor.gd  # 备用预测器
+│   │   ├── prediction_models/
+│   │   │   ├── bpm_analyzer.gd    # BPM分析模型
+│   │   │   └── pattern_recognizer.gd # 模式识别器
+│   │   └── prediction_engine_test.gd # 预测引擎测试
+│   ├── human_integration/         # 人机集成
+│   │   ├── personal_calibration.gd # 个人校准
+│   │   ├── adaptive_feedback.gd   # 自适应反馈
+│   │   ├── learning_system.gd     # 学习系统
+│   │   ├── preference_engine.gd   # 偏好引擎
+│   │   ├── user_profiles/
+│   │   │   ├── timing_profile.gd  # 用户时间感知档案
+│   │   │   └── adaptation_history.gd # 适应历史记录
+│   │   └── human_integration_test.gd # 人机集成测试
+│   ├── game_core/                 # 游戏逻辑层
+│   │   ├── chess_engine/
+│   │   │   ├── board_manager.gd   # 棋盘管理器
+│   │   │   ├── piece_controller.gd # 棋子控制器
+│   │   │   ├── move_validator.gd  # 移动验证器
+│   │   │   ├── game_state.gd      # 游戏状态
+│   │   │   ├── chess_rules.gd     # 象棋规则
+│   │   │   └── chess_engine_test.gd # 象棋引擎测试
+│   │   ├── rhythm_system/
+│   │   │   ├── beat_sync_manager.gd # 节拍同步管理器
+│   │   │   ├── color_matcher.gd   # 色彩匹配器
+│   │   │   ├── energy_system.gd   # 能量系统
+│   │   │   ├── skill_manager.gd   # 技能管理器
+│   │   │   └── rhythm_system_test.gd # 节拍系统测试
+│   │   └── ai/
+│   │       ├── ai_controller.gd   # AI控制器
+│   │       ├── minimax_engine.gd  # Minimax引擎
+│   │       ├── difficulty_manager.gd # 难度管理器
+│   │       ├── ai_beat_sync.gd    # AI节拍同步
+│   │       ├── evaluation_functions.gd # 评估函数
+│   │       └── ai_test.gd         # AI测试
+│   ├── rendering/                 # 3D渲染层
+│   │   ├── board_3d/
+│   │   │   ├── board_renderer.gd  # 棋盘渲染器
+│   │   │   ├── piece_animator.gd  # 棋子动画器
+│   │   │   ├── layer_manager.gd   # 层级管理器
+│   │   │   └── board_3d_test.gd   # 3D棋盘测试
+│   │   ├── effects/
+│   │   │   ├── audio_visualizer.gd # 音频可视化器
+│   │   │   ├── beat_effects.gd    # 节拍特效
+│   │   │   ├── color_effects.gd   # 色彩特效
+│   │   │   ├── particle_manager.gd # 粒子管理器
+│   │   │   └── effects_test.gd    # 特效测试
+│   │   └── camera/
+│   │       ├── camera_controller.gd # 摄像机控制器
+│   │       ├── camera_transitions.gd # 摄像机转换
+│   │       └── camera_test.gd     # 摄像机测试
+│   ├── user_experience/           # 用户体验层
+│   │   ├── accessibility/
+│   │   │   ├── colorblind_support.gd # 色盲支持
+│   │   │   ├── audio_cues.gd      # 音频提示
+│   │   │   ├── ui_scaling.gd      # UI缩放
+│   │   │   └── accessibility_test.gd # 可访问性测试
+│   │   ├── feedback_systems/
+│   │   │   ├── haptic_feedback.gd # 触觉反馈
+│   │   │   ├── visual_feedback.gd # 视觉反馈
+│   │   │   ├── audio_feedback.gd  # 音频反馈
+│   │   │   └── feedback_test.gd   # 反馈测试
+│   │   └── ui/
+│   │       ├── main_menu_controller.gd # 主菜单控制器
+│   │       ├── game_ui_controller.gd # 游戏UI控制器
+│   │       ├── settings_controller.gd # 设置控制器
+│   │       ├── calibration_controller.gd # 校准控制器
+│   │       └── ui_test.gd         # UI测试
+│   ├── data/                      # 数据层
+│   │   ├── models/
+│   │   │   ├── beat_event.gd      # 节拍事件数据
+│   │   │   ├── board_state.gd     # 棋盘状态数据
+│   │   │   ├── chess_piece.gd     # 棋子数据
+│   │   │   ├── move.gd            # 移动数据
+│   │   │   ├── user_profile.gd    # 用户档案数据
+│   │   │   ├── audio_data.gd      # 音频数据
+│   │   │   └── error_event.gd     # 错误事件数据
+│   │   ├── persistence/
+│   │   │   ├── config_manager.gd  # 配置管理器
+│   │   │   ├── save_manager.gd    # 存档管理器
+│   │   │   ├── user_data_manager.gd # 用户数据管理器
+│   │   │   └── persistence_test.gd # 持久化测试
+│   │   └── validation/
+│   │       ├── data_validator.gd  # 数据验证器
+│   │       ├── input_sanitizer.gd # 输入清理器
+│   │       └── validation_test.gd # 验证测试
+│   └── testing/                   # 测试基础设施
+│       ├── audio_mocking/
+│       │   ├── mock_audio_stream.gd # 模拟音频流
+│       │   ├── test_beat_generator.gd # 测试节拍生成器
+│       │   └── audio_test_utils.gd # 音频测试工具
+│       ├── latency_measurement/
+│       │   ├── latency_tester.gd  # 延迟测试器
+│       │   ├── performance_monitor.gd # 性能监控器
+│       │   └── benchmark_suite.gd # 基准测试套件
+│       ├── integration_tests/
+│       │   ├── audio_sync_tests.gd # 音频同步测试
+│       │   ├── gameplay_tests.gd  # 游戏玩法测试
+│       │   └── ui_tests.gd        # UI测试
+│       └── test_framework/
+│           ├── test_runner.gd     # 测试运行器
+│           ├── test_reporter.gd   # 测试报告器
+│           └── test_utilities.gd  # 测试工具
+├── autoload/                      # 全局单例
+│   ├── event_bus.gd              # 事件总线
+│   ├── game_manager.gd           # 游戏管理器
+│   ├── audio_manager.gd          # 音频管理器
+│   ├── settings_manager.gd       # 设置管理器
+│   ├── performance_monitor.gd    # 性能监控器
+│   └── debug_console.gd          # 调试控制台
+├── assets/                       # 游戏资源
+│   ├── audio/
+│   │   ├── music/
+│   │   │   ├── background/       # 背景音乐
+│   │   │   └── test_tracks/      # 测试音轨
+│   │   ├── sfx/
+│   │   │   ├── ui/              # UI音效
+│   │   │   ├── game/            # 游戏音效
+│   │   │   └── feedback/        # 反馈音效
+│   │   └── core/
+│   │       ├── metronome.ogg    # 节拍器音频
+│   │       └── beat_cues.ogg    # 节拍提示音
+│   ├── models/
+│   │   ├── pieces/
+│   │   │   ├── king.glb         # 王棋子模型
+│   │   │   ├── queen.glb        # 后棋子模型
+│   │   │   └── [其他棋子模型]
+│   │   └── board/
+│   │       ├── board_base.glb   # 棋盘基础模型
+│   │       └── layer_dividers.glb # 层级分隔器
+│   ├── textures/
+│   │   ├── pieces/              # 棋子纹理
+│   │   ├── board/               # 棋盘纹理
+│   │   ├── ui/                  # UI纹理
+│   │   └── effects/             # 特效纹理
+│   ├── materials/
+│   │   ├── pieces/              # 棋子材质
+│   │   ├── board/               # 棋盘材质
+│   │   └── effects/             # 特效材质
+│   └── fonts/
+│       ├── ui_font.ttf          # UI字体
+│       └── mono_font.ttf        # 等宽字体
+├── shaders/                     # 着色器文件
+│   ├── board_effects.gdshader   # 棋盘特效着色器
+│   ├── audio_visualizer.gdshader # 音频可视化着色器
+│   ├── piece_highlight.gdshader # 棋子高亮着色器
+│   ├── beat_pulse.gdshader      # 节拍脉冲着色器
+│   └── color_transition.gdshader # 色彩过渡着色器
+├── config/                      # 配置文件
+│   ├── default_settings.json    # 默认设置
+│   ├── audio_config.json        # 音频配置
+│   ├── input_map.json           # 输入映射
+│   └── ai_personalities.json   # AI性格配置
+└── tools/                       # 开发工具
+    ├── build_scripts/
+    │   ├── export_all.gd        # 导出所有平台
+    │   └── package_release.gd   # 打包发布
+    ├── debug_tools/
+    │   ├── audio_analyzer.gd    # 音频分析器
+    │   └── performance_profiler.gd # 性能分析器
+    └── content_tools/
+        ├── music_importer.gd    # 音乐导入器
+        └── asset_validator.gd   # 资源验证器
+```
+
+### 架构边界定义
+
+**组件边界：**
+- **时间核心层** ↔ **预测引擎**：通过BeatEvent和TimingData接口通信
+- **游戏逻辑层** ↔ **渲染层**：通过BoardState和RenderCommand接口分离
+- **人机集成** ↔ **所有层级**：通过EventBus提供校准和反馈数据
+- **数据层** ↔ **业务逻辑**：通过Repository模式和数据模型类隔离
+
+**服务边界：**
+- **音频服务**：独立的音频处理和节拍检测服务
+- **游戏服务**：象棋逻辑和AI决策服务
+- **渲染服务**：3D渲染和视觉效果服务
+- **用户服务**：界面交互和用户体验服务
+
+**数据边界：**
+- **实时数据**：音频流、节拍事件、游戏状态（内存中）
+- **持久化数据**：用户配置、游戏进度、校准数据（ConfigFile/JSON）
+- **静态数据**：游戏资源、配置文件、AI参数（文件系统）
